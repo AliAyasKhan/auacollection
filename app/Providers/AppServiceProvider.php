@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
 use App\Repositories\ProductRepositoryInterface;
@@ -31,6 +32,11 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Paginator::useBootstrapFive();
+
+        // Prevent mixed-content (HTTPS page loading HTTP CSS/images) on live hosting
+        if ($this->app->environment('production')) {
+            URL::forceScheme('https');
+        }
 
         ResetPassword::createUrlUsing(function ($user, string $token) {
             $email = $user->getEmailForPasswordReset();
