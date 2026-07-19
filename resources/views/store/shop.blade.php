@@ -4,173 +4,247 @@
 
 @section('content')
 
-    <!-- Header Banner -->
-    <section class="py-5 bg-dark text-white text-center" style="background: linear-gradient(135deg, #1C1C1E 0%, #000000 100%);">
-        <div class="container py-4">
-            <h1 class="font-serif display-4 mb-2">THE COLLECTION</h1>
-            <p class="text-white-50 lead mb-0">Discover minimal luxury, masterfully tailored garments.</p>
+    @php
+        $heroEyebrow = 'Boutique';
+        $heroTitle = 'The Collection';
+        $heroLede = 'Discover minimal luxury and masterfully tailored garments.';
+        $crumbCurrent = 'Shop';
+
+        if (request()->filled('sale')) {
+            $heroEyebrow = 'Offers';
+            $heroTitle = 'Sale';
+            $heroLede = 'Selected pieces, thoughtfully reduced for a limited time.';
+            $crumbCurrent = 'Sale';
+        } elseif (request()->filled('new_arrival')) {
+            $heroEyebrow = 'Just In';
+            $heroTitle = 'New Arrivals';
+            $heroLede = 'Fresh silhouettes newly added to the boutique.';
+            $crumbCurrent = 'New Arrivals';
+        } elseif (request()->filled('category')) {
+            $selectedCategory = $categories->firstWhere('slug', request('category'));
+            $heroEyebrow = 'Category';
+            $heroTitle = $selectedCategory->name ?? 'Collection';
+            $heroLede = 'Explore refined pieces curated for this category.';
+            $crumbCurrent = $heroTitle;
+        } elseif (request()->filled('collection')) {
+            $selectedCollection = $collections->firstWhere('slug', request('collection'));
+            $heroEyebrow = 'Collection';
+            $heroTitle = $selectedCollection->name ?? 'Collection';
+            $heroLede = 'A curated edit from our signature collections.';
+            $crumbCurrent = $heroTitle;
+        } elseif (request()->filled('search')) {
+            $heroEyebrow = 'Search';
+            $heroTitle = 'Search Results';
+            $heroLede = 'Showing matches for “'.request('search').'”.';
+            $crumbCurrent = 'Search';
+        }
+
+        $hasActiveFilters = request()->filled('category')
+            || request()->filled('collection')
+            || request()->filled('brand')
+            || request()->filled('search')
+            || request()->filled('price_min')
+            || request()->filled('price_max')
+            || request()->filled('sizes')
+            || request()->filled('colors');
+
+        $sortOptions = [
+            'newest' => 'Newest',
+            'price_asc' => 'Price: Low to High',
+            'price_desc' => 'Price: High to Low',
+            'name_asc' => 'Name: A to Z',
+            'name_desc' => 'Name: Z to A',
+        ];
+        $currentSort = request('sort_by', 'newest');
+        if (! array_key_exists($currentSort, $sortOptions)) {
+            $currentSort = 'newest';
+        }
+    @endphp
+
+    <section class="collection-hero">
+        <div class="collection-hero__veil"></div>
+        <div class="container collection-hero__content">
+            <p class="collection-hero__eyebrow">{{ $heroEyebrow }}</p>
+            <h1 class="collection-hero__title font-serif">{{ $heroTitle }}</h1>
+            <p class="collection-hero__lede">{{ $heroLede }}</p>
+            <span class="collection-hero__rule" aria-hidden="true"></span>
         </div>
     </section>
 
-    <!-- Breadcrumbs -->
     <div class="container">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb breadcrumb-luxury mb-0">
                 <li class="breadcrumb-item"><a href="{{ url('/') }}">Home</a></li>
-                <li class="breadcrumb-item active" aria-current="page">Shop</li>
+                @if($crumbCurrent === 'Shop')
+                    <li class="breadcrumb-item active" aria-current="page">Shop</li>
+                @else
+                    <li class="breadcrumb-item"><a href="{{ url('/shop') }}">Shop</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">{{ $crumbCurrent }}</li>
+                @endif
             </ol>
         </nav>
     </div>
 
-    <!-- Shop Content -->
-    <section class="pb-5">
+    <section class="pb-5 shop-catalog-section">
         <div class="container">
             <form action="{{ url('/shop') }}" method="GET" id="filterForm">
-                <div class="row g-4">
-                    
-                    <!-- Sidebar Filters -->
-                    <div class="col-lg-3">
-                        <div class="card border-0 shadow-sm rounded-4 p-4">
-                            <h4 class="font-heading fs-5 pb-2 mb-4 border-bottom border-light">FILTERS</h4>
-                            
-                            <!-- Search filter -->
-                            <div class="mb-4">
-                                <label class="form-label">SEARCH</label>
-                                <div class="input-group bg-light rounded-3 px-2 py-1">
-                                    <input type="text" name="search" class="form-control border-0 bg-transparent shadow-none" placeholder="Search..." value="{{ request('search') }}">
-                                    <button class="btn btn-link text-dark p-0 border-0" type="submit"><i class="bi bi-search"></i></button>
-                                </div>
-                            </div>
+                @if(request()->filled('sale'))
+                    <input type="hidden" name="sale" value="1">
+                @endif
+                @if(request()->filled('new_arrival'))
+                    <input type="hidden" name="new_arrival" value="1">
+                @endif
 
-                            <!-- Categories -->
-                            <div class="mb-4">
-                                <label class="form-label">CATEGORIES</label>
-                                <div class="d-flex flex-column gap-2">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="category" id="cat-all" value="" {{ !request('category') ? 'checked' : '' }} onchange="this.form.submit()">
-                                        <label class="form-check-label small" for="cat-all">All Categories</label>
-                                    </div>
-                                    @foreach($categories as $cat)
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="category" id="cat-{{ $cat->slug }}" value="{{ $cat->slug }}" {{ request('category') === $cat->slug ? 'checked' : '' }} onchange="this.form.submit()">
-                                            <label class="form-check-label small" for="cat-{{ $cat->slug }}">{{ $cat->name }}</label>
-                                        </div>
-                                    @endforeach
-                                </div>
-                            </div>
+                <div class="shop-toolbar">
+                    <button type="button" class="shop-toolbar__btn" id="toggleFilters" aria-expanded="false" aria-controls="shopFiltersPanel">
+                        <i class="bi bi-funnel"></i>
+                        <span id="toggleFiltersLabel">Show Filters</span>
+                        @if($hasActiveFilters)
+                            <span class="shop-toolbar__dot" aria-hidden="true"></span>
+                        @endif
+                    </button>
 
-                            <!-- Collections -->
-                            <div class="mb-4">
-                                <label class="form-label">COLLECTIONS</label>
-                                <div class="d-flex flex-column gap-2">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="collection" id="col-all" value="" {{ !request('collection') ? 'checked' : '' }} onchange="this.form.submit()">
-                                        <label class="form-check-label small" for="col-all">All Collections</label>
-                                    </div>
-                                    @foreach($collections as $col)
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="collection" id="col-{{ $col->slug }}" value="{{ $col->slug }}" {{ request('collection') === $col->slug ? 'checked' : '' }} onchange="this.form.submit()">
-                                            <label class="form-check-label small" for="col-{{ $col->slug }}">{{ $col->name }}</label>
-                                        </div>
-                                    @endforeach
-                                </div>
-                            </div>
+                    <p class="shop-toolbar__count mb-0">
+                        {{ number_format($products->total()) }} {{ \Illuminate\Support\Str::plural('Product', $products->total()) }}
+                    </p>
 
-                            <!-- Brands -->
-                            <div class="mb-4">
-                                <label class="form-label">BRANDS</label>
-                                <div class="d-flex flex-column gap-2">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="brand" id="brand-all" value="" {{ !request('brand') ? 'checked' : '' }} onchange="this.form.submit()">
-                                        <label class="form-check-label small" for="brand-all">All Brands</label>
-                                    </div>
-                                    @foreach($brands as $b)
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="brand" id="brand-{{ $b->slug }}" value="{{ $b->slug }}" {{ request('brand') === $b->slug ? 'checked' : '' }} onchange="this.form.submit()">
-                                            <label class="form-check-label small" for="brand-{{ $b->slug }}">{{ $b->name }}</label>
-                                        </div>
-                                    @endforeach
-                                </div>
-                            </div>
-
-                            <!-- Sizes -->
-                            <div class="mb-4">
-                                <label class="form-label mb-3">SIZES</label>
-                                <div>
-                                    @foreach($sizes as $sz)
-                                        <div class="form-check d-inline-block p-0 me-1">
-                                            <input class="btn-check" type="checkbox" name="sizes[]" id="size-{{ $sz->id }}" value="{{ $sz->id }}" {{ is_array(request('sizes')) && in_array($sz->id, request('sizes')) ? 'checked' : '' }} onchange="this.form.submit()">
-                                            <label class="variant-selector-size m-0 text-center" style="min-width: 44px;" for="size-{{ $sz->id }}">{{ $sz->code }}</label>
-                                        </div>
-                                    @endforeach
-                                </div>
-                            </div>
-
-                            <!-- Colors -->
-                            <div class="mb-4">
-                                <label class="form-label mb-3">COLORS</label>
-                                <div>
-                                    @foreach($colors as $col)
-                                        <div class="form-check d-inline-block p-0 me-1">
-                                            <input class="btn-check" type="checkbox" name="colors[]" id="color-{{ $col->id }}" value="{{ $col->id }}" {{ is_array(request('colors')) && in_array($col->id, request('colors')) ? 'checked' : '' }} onchange="this.form.submit()">
-                                            <label class="variant-selector-color m-0" style="background-color: {{ $col->code }};" for="color-{{ $col->id }}"></label>
-                                        </div>
-                                    @endforeach
-                                </div>
-                            </div>
-
-                            <!-- Price Range -->
-                            <div class="mb-4">
-                                <label class="form-label">PRICE RANGE</label>
-                                <div class="row g-2 mb-3">
-                                    <div class="col-6">
-                                        <input type="number" name="price_min" class="form-control bg-light border-0 py-2 fs-7" placeholder="Min" value="{{ request('price_min') }}">
-                                    </div>
-                                    <div class="col-6">
-                                        <input type="number" name="price_max" class="form-control bg-light border-0 py-2 fs-7" placeholder="Max" value="{{ request('price_max') }}">
-                                    </div>
-                                </div>
-                                <button type="submit" class="btn-luxury-dark w-100 py-2">APPLY PRICE</button>
-                            </div>
-
-                            <!-- Reset filters -->
-                            <div>
-                                <a href="{{ url('/shop') }}" class="btn btn-link text-muted small text-decoration-none w-100 text-center">RESET ALL FILTERS</a>
-                            </div>
-
-                        </div>
+                    <div class="shop-sort" id="shopSort">
+                        <input type="hidden" name="sort_by" id="sort_by" value="{{ $currentSort }}">
+                        <button type="button" class="shop-sort__toggle" id="shopSortToggle" aria-haspopup="listbox" aria-expanded="false" aria-controls="shopSortMenu">
+                            <i class="bi bi-sort-down" aria-hidden="true"></i>
+                            <span id="shopSortLabel">{{ $sortOptions[$currentSort] }}</span>
+                            <i class="bi bi-chevron-down shop-sort__chevron" aria-hidden="true"></i>
+                        </button>
+                        <ul class="shop-sort__menu" id="shopSortMenu" role="listbox" hidden>
+                            @foreach($sortOptions as $value => $label)
+                                <li role="option">
+                                    <button
+                                        type="button"
+                                        class="shop-sort__option {{ $currentSort === $value ? 'is-active' : '' }}"
+                                        data-value="{{ $value }}"
+                                        data-label="{{ $label }}"
+                                        aria-selected="{{ $currentSort === $value ? 'true' : 'false' }}"
+                                    >
+                                        {{ $label }}
+                                    </button>
+                                </li>
+                            @endforeach
+                        </ul>
                     </div>
+                </div>
 
-                    <!-- Products Catalog -->
-                    <div class="col-lg-9">
-                        <div class="d-flex justify-content-between align-items-center mb-4">
-                            <p class="text-muted mb-0 small">SHOWING {{ $products->firstItem() ?? 0 }}-{{ $products->lastItem() ?? 0 }} OF {{ $products->total() }} PRODUCTS</p>
-                            
-                            <!-- Sort dropdown -->
-                            <div class="d-flex align-items-center gap-2">
-                                <span class="text-muted small text-nowrap">SORT BY</span>
-                                <select name="sort_by" class="form-select border-0 bg-transparent shadow-none small fw-semibold" onchange="this.form.submit()">
-                                    <option value="newest" {{ request('sort_by') == 'newest' ? 'selected' : '' }}>Newest</option>
-                                    <option value="price_asc" {{ request('sort_by') == 'price_asc' ? 'selected' : '' }}>Price: Low to High</option>
-                                    <option value="price_desc" {{ request('sort_by') == 'price_desc' ? 'selected' : '' }}>Price: High to Low</option>
-                                    <option value="name_asc" {{ request('sort_by') == 'name_asc' ? 'selected' : '' }}>Name: A to Z</option>
-                                    <option value="name_desc" {{ request('sort_by') == 'name_desc' ? 'selected' : '' }}>Name: Z to A</option>
-                                </select>
+                <div class="row g-4 shop-layout" id="shopLayout">
+                    <aside class="col-lg-3 shop-filters-col d-none" id="shopFiltersPanel">
+                        <div class="shop-filters">
+                            <div class="shop-filters__head">
+                                <h2 class="shop-filters__title">Filters</h2>
+                                <a href="{{ url('/shop') }}{{ request()->filled('sale') ? '?sale=1' : (request()->filled('new_arrival') ? '?new_arrival=1' : '') }}" class="shop-filters__reset">Clear all</a>
+                            </div>
+
+                            <div class="shop-filter-group">
+                                <label class="shop-filter-label" for="shop-search">Search</label>
+                                <div class="shop-search">
+                                    <input id="shop-search" type="text" name="search" class="shop-search__input" placeholder="Search Collection" value="{{ request('search') }}">
+                                    <button class="shop-search__btn" type="submit" aria-label="Search"><i class="bi bi-search"></i></button>
+                                </div>
+                            </div>
+
+                            <div class="shop-filter-group">
+                                <p class="shop-filter-label">Categories</p>
+                                <div class="shop-filter-list">
+                                    <label class="shop-check">
+                                        <input type="radio" name="category" value="" {{ !request('category') ? 'checked' : '' }} onchange="this.form.submit()">
+                                        <span>All Categories</span>
+                                    </label>
+                                    @foreach($categories as $cat)
+                                        <label class="shop-check">
+                                            <input type="radio" name="category" value="{{ $cat->slug }}" {{ request('category') === $cat->slug ? 'checked' : '' }} onchange="this.form.submit()">
+                                            <span>{{ $cat->name }}</span>
+                                        </label>
+                                    @endforeach
+                                </div>
+                            </div>
+
+                            <div class="shop-filter-group">
+                                <p class="shop-filter-label">Collections</p>
+                                <div class="shop-filter-list">
+                                    <label class="shop-check">
+                                        <input type="radio" name="collection" value="" {{ !request('collection') ? 'checked' : '' }} onchange="this.form.submit()">
+                                        <span>All Collections</span>
+                                    </label>
+                                    @foreach($collections as $col)
+                                        <label class="shop-check">
+                                            <input type="radio" name="collection" value="{{ $col->slug }}" {{ request('collection') === $col->slug ? 'checked' : '' }} onchange="this.form.submit()">
+                                            <span>{{ $col->name }}</span>
+                                        </label>
+                                    @endforeach
+                                </div>
+                            </div>
+
+                            <div class="shop-filter-group">
+                                <p class="shop-filter-label">Brands</p>
+                                <div class="shop-filter-list">
+                                    <label class="shop-check">
+                                        <input type="radio" name="brand" value="" {{ !request('brand') ? 'checked' : '' }} onchange="this.form.submit()">
+                                        <span>All Brands</span>
+                                    </label>
+                                    @foreach($brands as $b)
+                                        <label class="shop-check">
+                                            <input type="radio" name="brand" value="{{ $b->slug }}" {{ request('brand') === $b->slug ? 'checked' : '' }} onchange="this.form.submit()">
+                                            <span>{{ $b->name }}</span>
+                                        </label>
+                                    @endforeach
+                                </div>
+                            </div>
+
+                            <div class="shop-filter-group">
+                                <p class="shop-filter-label">Sizes</p>
+                                <div class="shop-size-grid">
+                                    @foreach($sizes as $sz)
+                                        <div>
+                                            <input class="btn-check" type="checkbox" name="sizes[]" id="size-{{ $sz->id }}" value="{{ $sz->id }}" {{ is_array(request('sizes')) && in_array($sz->id, request('sizes')) ? 'checked' : '' }} onchange="this.form.submit()">
+                                            <label class="shop-size-chip" for="size-{{ $sz->id }}">{{ $sz->code }}</label>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+
+                            <div class="shop-filter-group">
+                                <p class="shop-filter-label">Colors</p>
+                                <div class="shop-color-grid">
+                                    @foreach($colors as $col)
+                                        <div>
+                                            <input class="btn-check" type="checkbox" name="colors[]" id="color-{{ $col->id }}" value="{{ $col->id }}" {{ is_array(request('colors')) && in_array($col->id, request('colors')) ? 'checked' : '' }} onchange="this.form.submit()">
+                                            <label class="shop-color-chip" style="--swatch: {{ $col->code }};" for="color-{{ $col->id }}" title="{{ $col->name }}"></label>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+
+                            <div class="shop-filter-group mb-0">
+                                <p class="shop-filter-label">Price Range</p>
+                                <div class="shop-price-row">
+                                    <input type="number" name="price_min" class="shop-price-input" placeholder="Min" value="{{ request('price_min') }}">
+                                    <span class="shop-price-sep">–</span>
+                                    <input type="number" name="price_max" class="shop-price-input" placeholder="Max" value="{{ request('price_max') }}">
+                                </div>
+                                <button type="submit" class="btn-luxury-dark w-100 mt-3 shop-price-apply">Apply Price</button>
                             </div>
                         </div>
+                    </aside>
 
-                        <!-- Products Grid -->
+                    <div class="col-12" id="shopCatalogCol">
                         @if($products->isEmpty())
                             <div class="text-center py-5">
                                 <i class="bi bi-search fs-1 text-muted d-block mb-3"></i>
                                 <h3 class="font-serif">No Products Found</h3>
-                                <p class="text-muted">We couldn't find any products matching your select criteria. Try resetting filters.</p>
-                                <a href="{{ url('/shop') }}" class="btn-luxury-dark mt-3">VIEW ALL PRODUCTS</a>
+                                <p class="text-muted">We couldn't find any products matching your selected criteria. Try resetting filters.</p>
+                                <a href="{{ url('/shop') }}" class="btn-luxury-dark mt-3">View All Products</a>
                             </div>
                         @else
-                            <div class="row g-4 mb-5">
+                            <div class="row g-4 mb-5" id="shopProductGrid">
                                 @foreach($products as $product)
-                                    <div class="col-md-4 col-sm-6">
+                                    <div class="col-lg-3 col-md-4 col-sm-6 shop-product-col">
                                         <div class="product-card">
                                             <div class="img-wrapper">
                                                 @if($product->has_discount)
@@ -178,7 +252,7 @@
                                                 @elseif($product->new_arrival)
                                                     <span class="badge-luxury">New</span>
                                                 @endif
-                                                
+
                                                 <a href="{{ route('store.product.detail', $product->slug) }}">
                                                     @if($product->primaryImage && $product->primaryImage->image_path)
                                                         <img src="{{ $product->image_url }}" alt="{{ $product->name }}">
@@ -208,16 +282,110 @@
                                 @endforeach
                             </div>
 
-                            <!-- Pagination -->
                             <div class="d-flex justify-content-center">
                                 {{ $products->links() }}
                             </div>
                         @endif
                     </div>
-
                 </div>
             </form>
         </div>
     </section>
 
 @endsection
+
+@push('scripts')
+<script>
+    (function () {
+        const toggle = document.getElementById('toggleFilters');
+        const panel = document.getElementById('shopFiltersPanel');
+        const catalog = document.getElementById('shopCatalogCol');
+        const label = document.getElementById('toggleFiltersLabel');
+        const layout = document.getElementById('shopLayout');
+        const cols = document.querySelectorAll('.shop-product-col');
+
+        if (toggle && panel && catalog) {
+            toggle.addEventListener('click', function () {
+                const open = panel.classList.contains('d-none');
+
+                panel.classList.toggle('d-none', !open);
+                toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+                label.textContent = open ? 'Hide Filters' : 'Show Filters';
+                layout.classList.toggle('shop-layout--filters-open', open);
+
+                catalog.classList.toggle('col-lg-9', open);
+                catalog.classList.toggle('col-12', !open);
+
+                cols.forEach(function (col) {
+                    col.classList.toggle('col-md-4', true);
+                    col.classList.toggle('col-sm-6', true);
+                    if (open) {
+                        col.classList.remove('col-lg-3');
+                    } else {
+                        col.classList.add('col-lg-3');
+                    }
+                });
+            });
+        }
+
+        const sortRoot = document.getElementById('shopSort');
+        const sortToggle = document.getElementById('shopSortToggle');
+        const sortMenu = document.getElementById('shopSortMenu');
+        const sortInput = document.getElementById('sort_by');
+        const sortLabel = document.getElementById('shopSortLabel');
+        const sortForm = document.getElementById('filterForm');
+
+        if (!sortRoot || !sortToggle || !sortMenu || !sortInput || !sortLabel || !sortForm) return;
+
+        function closeSort() {
+            sortMenu.hidden = true;
+            sortRoot.classList.remove('is-open');
+            sortToggle.setAttribute('aria-expanded', 'false');
+        }
+
+        function openSort() {
+            sortMenu.hidden = false;
+            sortRoot.classList.add('is-open');
+            sortToggle.setAttribute('aria-expanded', 'true');
+        }
+
+        sortToggle.addEventListener('click', function (e) {
+            e.stopPropagation();
+            if (sortMenu.hidden) {
+                openSort();
+            } else {
+                closeSort();
+            }
+        });
+
+        sortMenu.querySelectorAll('.shop-sort__option').forEach(function (option) {
+            option.addEventListener('click', function () {
+                sortInput.value = option.getAttribute('data-value');
+                sortLabel.textContent = option.getAttribute('data-label');
+
+                sortMenu.querySelectorAll('.shop-sort__option').forEach(function (el) {
+                    el.classList.remove('is-active');
+                    el.setAttribute('aria-selected', 'false');
+                });
+                option.classList.add('is-active');
+                option.setAttribute('aria-selected', 'true');
+
+                closeSort();
+                sortForm.submit();
+            });
+        });
+
+        document.addEventListener('click', function (e) {
+            if (!sortRoot.contains(e.target)) {
+                closeSort();
+            }
+        });
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+                closeSort();
+            }
+        });
+    })();
+</script>
+@endpush

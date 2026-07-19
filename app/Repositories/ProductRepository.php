@@ -93,6 +93,17 @@ class ProductRepository implements ProductRepositoryInterface
             });
         }
 
+        if (! empty($filters['new_arrival'])) {
+            $query->where('new_arrival', true);
+        }
+
+        if (! empty($filters['sale'])) {
+            $query->where(function ($q) {
+                $q->where('sale_product', true)
+                    ->orWhereNotNull('discount_price');
+            });
+        }
+
         // Sorting
         $sortBy = $filters['sort_by'] ?? 'newest';
         switch ($sortBy) {

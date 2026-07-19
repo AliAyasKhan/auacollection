@@ -45,8 +45,12 @@ class StoreController extends Controller
         ]);
 
         // Support simple query triggers like new_arrival=1 or sale=1
-        if ($request->has('new_arrival')) {
-            $filters['new_arrival'] = true; // wait, let's make sure repository handles it
+        if ($request->filled('new_arrival')) {
+            $filters['new_arrival'] = true;
+        }
+
+        if ($request->filled('sale')) {
+            $filters['sale'] = true;
         }
 
         $products = $this->productRepository->searchAndFilter($filters, 12);
