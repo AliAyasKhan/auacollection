@@ -1,33 +1,40 @@
 <x-guest-layout>
-    <div class="text-center mb-4">
-        <p class="small text-uppercase fw-semibold mb-1" style="letter-spacing: 2px; color: var(--color-accent-gold);">Admin Portal</p>
-        <p class="small text-muted mb-0">Choose a new password</p>
+    <div class="auth-form-header">
+        <p class="auth-form-kicker auth-form-kicker--admin">Admin Portal</p>
+        <h2 class="auth-form-title font-serif">Choose a new password</h2>
+        <p class="auth-form-subtitle">Set a new password for your staff account.</p>
     </div>
 
-    <form method="POST" action="{{ route('admin.password.store') }}">
+    <form method="POST" action="{{ route('admin.password.store') }}" class="auth-form">
         @csrf
-
         <input type="hidden" name="token" value="{{ $request->route('token') }}">
 
-        <div class="mb-3">
-            <label for="email" class="form-label">Email Address</label>
-            <input id="email" class="form-control" type="email" name="email" value="{{ old('email', $request->email) }}" required autofocus autocomplete="username" />
+        <div class="auth-field">
+            <label for="email" class="auth-label">Email Address</label>
+            <div class="auth-input-wrap">
+                <i class="bi bi-envelope"></i>
+                <input id="email" class="auth-input" type="email" name="email" value="{{ old('email', $request->email) }}" required autofocus autocomplete="username">
+            </div>
         </div>
 
-        <div class="mb-3">
-            <label for="password" class="form-label">New Password</label>
-            <input id="password" class="form-control" type="password" name="password" required autocomplete="new-password" />
+        <div class="auth-field">
+            <label for="password" class="auth-label">New Password</label>
+            <div class="auth-input-wrap">
+                <i class="bi bi-lock"></i>
+                <input id="password" class="auth-input" type="password" name="password" required autocomplete="new-password">
+            </div>
         </div>
 
-        <div class="mb-4">
-            <label for="password_confirmation" class="form-label">Confirm New Password</label>
-            <input id="password_confirmation" class="form-control" type="password" name="password_confirmation" required autocomplete="new-password" />
+        <div class="auth-field">
+            <label for="password_confirmation" class="auth-label">Confirm New Password</label>
+            <div class="auth-input-wrap">
+                <i class="bi bi-shield-lock"></i>
+                <input id="password_confirmation" class="auth-input" type="password" name="password_confirmation" required autocomplete="new-password">
+            </div>
         </div>
 
-        <div class="d-grid">
-            <button type="submit" class="btn-luxury-dark py-2.5">
-                RESET PASSWORD
-            </button>
-        </div>
+        <button type="submit" class="btn-luxury-gold auth-submit w-100">
+            Reset Password
+        </button>
     </form>
 </x-guest-layout>

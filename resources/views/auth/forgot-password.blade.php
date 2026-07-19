@@ -1,27 +1,27 @@
 <x-guest-layout>
-    <div class="mb-4 text-muted small lh-lg">
-        Forgot your password? No problem. Just let us know your email address and we will email you a password reset link that will allow you to choose a new one.
+    <div class="auth-form-header">
+        <p class="auth-form-kicker">Password Reset</p>
+        <h2 class="auth-form-title font-serif">Forgot your password?</h2>
+        <p class="auth-form-subtitle">Enter your email and we will send a reset link.</p>
     </div>
 
-    <form method="POST" action="{{ route('password.email') }}">
+    <form method="POST" action="{{ route('password.email') }}" class="auth-form">
         @csrf
 
-        <!-- Email Address -->
-        <div class="mb-4">
-            <label for="email" class="form-label">Email Address</label>
-            <input id="email" class="form-control" type="email" name="email" value="{{ old('email') }}" required autofocus />
+        <div class="auth-field">
+            <label for="email" class="auth-label">Email Address</label>
+            <div class="auth-input-wrap">
+                <i class="bi bi-envelope"></i>
+                <input id="email" class="auth-input" type="email" name="email" value="{{ old('email') }}" required autofocus placeholder="you@example.com">
+            </div>
         </div>
 
-        <div class="d-grid gap-2 mb-3">
-            <button type="submit" class="btn-luxury-dark py-2.5">
-                EMAIL RESET LINK
-            </button>
-        </div>
+        <button type="submit" class="btn-luxury-dark auth-submit w-100">
+            Email Reset Link
+        </button>
 
-        <div class="text-center">
-            <a href="{{ route('login') }}" class="text-dark small fw-semibold text-decoration-none">
-                Back to Sign In
-            </a>
-        </div>
+        <p class="auth-switch">
+            <a href="{{ route('login') }}">Back to Sign In</a>
+        </p>
     </form>
 </x-guest-layout>

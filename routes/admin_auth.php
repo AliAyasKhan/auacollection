@@ -9,19 +9,25 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 | Admin Authentication Routes
 |--------------------------------------------------------------------------
-| Separate from customer /login — no admin self-registration.
+| Customer login: /login
+| Admin login:    /login/admin
 */
 
-Route::middleware('guest')->prefix('admin')->name('admin.')->group(function () {
-    Route::get('login', [AuthenticatedSessionController::class, 'create'])->name('login');
-    Route::post('login', [AuthenticatedSessionController::class, 'store'])->name('login.store');
+Route::middleware('guest')->name('admin.')->group(function () {
+    Route::get('login/admin', [AuthenticatedSessionController::class, 'create'])->name('login');
+    Route::post('login/admin', [AuthenticatedSessionController::class, 'store'])->name('login.store');
 
-    Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])->name('password.request');
-    Route::post('forgot-password', [PasswordResetLinkController::class, 'store'])->name('password.email');
+    Route::prefix('admin')->group(function () {
+        Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])->name('password.request');
+        Route::post('forgot-password', [PasswordResetLinkController::class, 'store'])->name('password.email');
 
-    Route::get('reset-password/{token}', [NewPasswordController::class, 'create'])->name('password.reset');
-    Route::post('reset-password', [NewPasswordController::class, 'store'])->name('password.store');
+        Route::get('reset-password/{token}', [NewPasswordController::class, 'create'])->name('password.reset');
+        Route::post('reset-password', [NewPasswordController::class, 'store'])->name('password.store');
+    });
 });
+
+// Old URL bookmark support
+Route::redirect('admin/login', '/login/admin', 301);
 
 Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');

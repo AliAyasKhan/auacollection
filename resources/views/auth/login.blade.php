@@ -1,59 +1,64 @@
 <x-guest-layout>
-    <div class="text-center mb-4">
-        <p class="small text-uppercase fw-semibold mb-1" style="letter-spacing: 2px;">Customer Login</p>
+    <div class="auth-form-header">
+        <p class="auth-form-kicker">Customer Login</p>
+        <h2 class="auth-form-title font-serif">Sign in to your account</h2>
+        <p class="auth-form-subtitle">Use your email and password to continue.</p>
     </div>
 
-    <form method="POST" action="{{ route('login') }}">
+    <form method="POST" action="{{ route('login') }}" class="auth-form">
         @csrf
 
-        <!-- Email Address -->
-        <div class="mb-3">
-            <label for="email" class="form-label">Email Address</label>
-            <input id="email" class="form-control" type="email" name="email" value="{{ old('email') }}" required autofocus autocomplete="username" />
+        <div class="auth-field">
+            <label for="email" class="auth-label">Email Address</label>
+            <div class="auth-input-wrap">
+                <i class="bi bi-envelope"></i>
+                <input
+                    id="email"
+                    class="auth-input"
+                    type="email"
+                    name="email"
+                    value="{{ old('email') }}"
+                    required
+                    autofocus
+                    autocomplete="username"
+                    placeholder="you@example.com"
+                >
+            </div>
         </div>
 
-        <!-- Password -->
-        <div class="mb-4">
-            <div class="d-flex justify-content-between align-items-center mb-1">
-                <label for="password" class="form-label mb-0">Password</label>
+        <div class="auth-field">
+            <div class="auth-label-row">
+                <label for="password" class="auth-label mb-0">Password</label>
                 @if (Route::has('password.request'))
-                    <a class="small text-muted text-decoration-none" href="{{ route('password.request') }}" style="font-size: 0.75rem;">
-                        Forgot password?
-                    </a>
+                    <a class="auth-link-muted" href="{{ route('password.request') }}">Forgot password?</a>
                 @endif
             </div>
-            <input id="password" class="form-control" type="password" name="password" required autocomplete="current-password" />
+            <div class="auth-input-wrap">
+                <i class="bi bi-lock"></i>
+                <input
+                    id="password"
+                    class="auth-input"
+                    type="password"
+                    name="password"
+                    required
+                    autocomplete="current-password"
+                    placeholder="Enter your password"
+                >
+            </div>
         </div>
 
-        <!-- Remember Me -->
-        <div class="form-check mb-4">
-            <input id="remember_me" type="checkbox" class="form-check-input" name="remember" style="accent-color: var(--color-primary-dark)">
-            <label class="form-check-label small text-muted" for="remember_me">
-                Remember my preferences
-            </label>
+        <div class="auth-check">
+            <input id="remember_me" type="checkbox" class="form-check-input" name="remember">
+            <label class="form-check-label" for="remember_me">Remember me</label>
         </div>
 
-        <!-- Submit Button -->
-        <div class="d-grid mb-4">
-            <button type="submit" class="btn-luxury-dark py-2.5">
-                SIGN IN
-            </button>
-        </div>
+        <button type="submit" class="btn-luxury-dark auth-submit w-100">
+            Sign In
+        </button>
 
-        <!-- Registration Link -->
-        <div class="text-center">
-            <p class="small text-muted mb-2">
-                New to AUA Collection?
-                <a href="{{ route('register') }}" class="text-dark fw-semibold text-decoration-none ms-1">
-                    Create Account
-                </a>
-            </p>
-            <p class="small text-muted mb-0">
-                Staff member?
-                <a href="{{ route('admin.login') }}" class="text-dark fw-semibold text-decoration-none ms-1">
-                    Admin Login
-                </a>
-            </p>
-        </div>
+        <p class="auth-switch">
+            New to AUA Collection?
+            <a href="{{ route('register') }}">Create Account</a>
+        </p>
     </form>
 </x-guest-layout>

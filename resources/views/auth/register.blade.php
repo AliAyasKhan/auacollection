@@ -1,46 +1,52 @@
 <x-guest-layout>
-    <form method="POST" action="{{ route('register') }}">
+    <div class="auth-form-header">
+        <p class="auth-form-kicker">Create Account</p>
+        <h2 class="auth-form-title font-serif">Join AUA Collection</h2>
+        <p class="auth-form-subtitle">Create your customer account to shop and track orders.</p>
+    </div>
+
+    <form method="POST" action="{{ route('register') }}" class="auth-form">
         @csrf
 
-        <!-- Name -->
-        <div class="mb-3">
-            <label for="name" class="form-label">Full Name</label>
-            <input id="name" class="form-control" type="text" name="name" value="{{ old('name') }}" required autofocus autocomplete="name" />
+        <div class="auth-field">
+            <label for="name" class="auth-label">Full Name</label>
+            <div class="auth-input-wrap">
+                <i class="bi bi-person"></i>
+                <input id="name" class="auth-input" type="text" name="name" value="{{ old('name') }}" required autofocus autocomplete="name" placeholder="Your full name">
+            </div>
         </div>
 
-        <!-- Email Address -->
-        <div class="mb-3">
-            <label for="email" class="form-label">Email Address</label>
-            <input id="email" class="form-control" type="email" name="email" value="{{ old('email') }}" required autocomplete="username" />
+        <div class="auth-field">
+            <label for="email" class="auth-label">Email Address</label>
+            <div class="auth-input-wrap">
+                <i class="bi bi-envelope"></i>
+                <input id="email" class="auth-input" type="email" name="email" value="{{ old('email') }}" required autocomplete="username" placeholder="you@example.com">
+            </div>
         </div>
 
-        <!-- Password -->
-        <div class="mb-3">
-            <label for="password" class="form-label">Password</label>
-            <input id="password" class="form-control" type="password" name="password" required autocomplete="new-password" />
+        <div class="auth-field">
+            <label for="password" class="auth-label">Password</label>
+            <div class="auth-input-wrap">
+                <i class="bi bi-lock"></i>
+                <input id="password" class="auth-input" type="password" name="password" required autocomplete="new-password" placeholder="Create a password">
+            </div>
         </div>
 
-        <!-- Confirm Password -->
-        <div class="mb-4">
-            <label for="password_confirmation" class="form-label">Confirm Password</label>
-            <input id="password_confirmation" class="form-control" type="password" name="password_confirmation" required autocomplete="new-password" />
+        <div class="auth-field">
+            <label for="password_confirmation" class="auth-label">Confirm Password</label>
+            <div class="auth-input-wrap">
+                <i class="bi bi-shield-lock"></i>
+                <input id="password_confirmation" class="auth-input" type="password" name="password_confirmation" required autocomplete="new-password" placeholder="Repeat your password">
+            </div>
         </div>
 
-        <!-- Submit Button -->
-        <div class="d-grid mb-4">
-            <button type="submit" class="btn-luxury-dark py-2.5">
-                CREATE ACCOUNT
-            </button>
-        </div>
+        <button type="submit" class="btn-luxury-dark auth-submit w-100">
+            Create Account
+        </button>
 
-        <!-- Login Link -->
-        <div class="text-center">
-            <p class="small text-muted mb-0">
-                Already have an account?
-                <a href="{{ route('login') }}" class="text-dark fw-semibold text-decoration-none ms-1">
-                    Sign In
-                </a>
-            </p>
-        </div>
+        <p class="auth-switch">
+            Already have an account?
+            <a href="{{ route('login') }}">Sign In</a>
+        </p>
     </form>
 </x-guest-layout>

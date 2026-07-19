@@ -13,9 +13,16 @@ class AdminAuthenticationTest extends TestCase
 
     public function test_admin_login_screen_can_be_rendered(): void
     {
-        $response = $this->get('/admin/login');
+        $response = $this->get('/login/admin');
 
         $response->assertStatus(200);
+    }
+
+    public function test_old_admin_login_url_redirects(): void
+    {
+        $response = $this->get('/admin/login');
+
+        $response->assertRedirect('/login/admin');
     }
 
     public function test_staff_can_authenticate_via_admin_login(): void
@@ -24,7 +31,7 @@ class AdminAuthenticationTest extends TestCase
         $user = User::factory()->create();
         $user->assignRole('super-admin');
 
-        $response = $this->post('/admin/login', [
+        $response = $this->post('/login/admin', [
             'email' => $user->email,
             'password' => 'password',
         ]);
@@ -39,7 +46,7 @@ class AdminAuthenticationTest extends TestCase
         $user = User::factory()->create();
         $user->assignRole('customer');
 
-        $response = $this->post('/admin/login', [
+        $response = $this->post('/login/admin', [
             'email' => $user->email,
             'password' => 'password',
         ]);

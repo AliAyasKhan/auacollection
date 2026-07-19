@@ -1,31 +1,27 @@
 <x-guest-layout>
-    <div class="text-center mb-4">
-        <p class="small text-uppercase fw-semibold mb-1" style="letter-spacing: 2px; color: var(--color-accent-gold);">Admin Portal</p>
-        <p class="small text-muted mb-0">Reset your admin password</p>
+    <div class="auth-form-header">
+        <p class="auth-form-kicker auth-form-kicker--admin">Admin Portal</p>
+        <h2 class="auth-form-title font-serif">Reset admin password</h2>
+        <p class="auth-form-subtitle">Enter your staff email and we will send a reset link.</p>
     </div>
 
-    <div class="mb-4 text-muted small lh-lg">
-        Enter your admin email address and we will send a password reset link.
-    </div>
-
-    <form method="POST" action="{{ route('admin.password.email') }}">
+    <form method="POST" action="{{ route('admin.password.email') }}" class="auth-form">
         @csrf
 
-        <div class="mb-4">
-            <label for="email" class="form-label">Email Address</label>
-            <input id="email" class="form-control" type="email" name="email" value="{{ old('email') }}" required autofocus />
+        <div class="auth-field">
+            <label for="email" class="auth-label">Email Address</label>
+            <div class="auth-input-wrap">
+                <i class="bi bi-envelope"></i>
+                <input id="email" class="auth-input" type="email" name="email" value="{{ old('email') }}" required autofocus placeholder="admin@auacollection.com">
+            </div>
         </div>
 
-        <div class="d-grid gap-2 mb-3">
-            <button type="submit" class="btn-luxury-dark py-2.5">
-                EMAIL RESET LINK
-            </button>
-        </div>
+        <button type="submit" class="btn-luxury-gold auth-submit w-100">
+            Email Reset Link
+        </button>
 
-        <div class="text-center">
-            <a href="{{ route('admin.login') }}" class="text-dark small fw-semibold text-decoration-none">
-                Back to Admin Sign In
-            </a>
-        </div>
+        <p class="auth-switch">
+            <a href="{{ route('admin.login') }}">Back to Admin Sign In</a>
+        </p>
     </form>
 </x-guest-layout>
